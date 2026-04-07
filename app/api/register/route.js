@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-const { getDb } = require('@/lib/db');
+import { db } from '@/lib/firebase';
+import { collection, addDoc } from 'firebase/firestore';
 
 // Helper function to generate unique ID
 function generateTeamId() {
@@ -46,19 +47,24 @@ export async function POST(request) {
         const teamId = generateTeamId();
         const membersJSON = members ? JSON.stringify(members) : "[]";
 
-        const db = getDb();
-        const stmt = db.prepare(
-            `INSERT INTO registrations (teamId, name, email, phone, track, membersJSON) VALUES (?, ?, ?, ?, ?, ?)`
-        );
-        stmt.run(teamId, name, email, phone, track, membersJSON);
+        // Save to Firebase Firestore
+        const docRef = await addDoc(collection(db, "registrations"), {
+            teamId,
+            name,
+            email,
+            phone,
+            track,
+            membersJSON,
+            timestamp: new Date().toISOString()
+        });
 
-        console.log(`New registration added with Team ID: ${teamId}`);
+        console.log(`New registration added with Team ID: ${teamId} and Document ID: ${docRef.id}`);
         return NextResponse.json(
             { message: "Registration successful!", teamId: teamId },
             { status: 201 }
         );
     } catch (err) {
-        console.error("Error inserting data:", err.message);
+        console.error("Error inserting data into Firebase:", err.message);
         return NextResponse.json(
             { error: "Failed to save to database." },
             { status: 500 }

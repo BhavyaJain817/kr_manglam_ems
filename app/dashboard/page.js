@@ -199,8 +199,8 @@ export default function Dashboard() {
                                 <tr><td colSpan="7" style={{ textAlign: 'center' }}>No registrations yet.</td></tr>
                             ) : (
                                 registrations.map(reg => {
-                                    // Parse SQLite timestamp as UTC to match formatting from server
-                                    const dateObj = new Date(reg.timestamp + 'Z')
+                                    // Parse Firestore ISO string
+                                    const dateObj = new Date(reg.timestamp)
                                     const formattedDate = dateObj.toLocaleDateString() + ' ' + dateObj.toLocaleTimeString()
 
                                     return (
