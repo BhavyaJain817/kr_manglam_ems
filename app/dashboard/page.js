@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import Script from 'next/script'
 import styles from './dashboard.module.css'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 
 const ADMIN_PASS = "ideas2026"
 
@@ -80,25 +81,20 @@ export default function Dashboard() {
     }
 
     const exportTableToPDF = (filename) => {
-        if (typeof window !== "undefined" && window.jspdf) {
-            const { jsPDF } = window.jspdf
-            const doc = new jsPDF('landscape')
-            
-            doc.setFontSize(16)
-            doc.text("IDEAS 4.0 - Registration Dashboard", 14, 15)
-            
-            doc.autoTable({
-                html: '#regTable',
-                startY: 25,
-                styles: { fontSize: 10, cellPadding: 3 },
-                headStyles: { fillColor: [0, 243, 255], textColor: [0, 0, 0], fontStyle: 'bold' },
-                alternateRowStyles: { fillColor: [240, 240, 240] }
-            })
+        const doc = new jsPDF('landscape')
+        
+        doc.setFontSize(16)
+        doc.text("IDEAS 4.0 - Registration Dashboard", 14, 15)
+        
+        autoTable(doc, {
+            html: '#regTable',
+            startY: 25,
+            styles: { fontSize: 10, cellPadding: 3 },
+            headStyles: { fillColor: [0, 243, 255], textColor: [0, 0, 0], fontStyle: 'bold' },
+            alternateRowStyles: { fillColor: [240, 240, 240] }
+        })
 
-            doc.save(filename)
-        } else {
-            alert("PDF library is still loading. Please try again in a few seconds.")
-        }
+        doc.save(filename)
     }
 
     const renderMembersHtml = (membersJSON) => {
@@ -145,8 +141,6 @@ export default function Dashboard() {
 
     return (
         <div className={styles.container}>
-            <Script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" strategy="afterInteractive" />
-            <Script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js" strategy="afterInteractive" />
 
             <div className={styles.mainContent}>
                 <div className={styles.headerControls}>
